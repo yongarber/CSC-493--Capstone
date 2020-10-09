@@ -32,7 +32,10 @@ data1<-data %>%
 data1 %>%
   filter(result!="other")->
   data2
+```
 
+```{r}
+write.csv(data2,'covid_data.csv')
 ```
 
 
