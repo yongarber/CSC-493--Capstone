@@ -30,12 +30,21 @@ data1<-data %>%
   select(-gender.1)
 
 data1 %>%
-  filter(result!="other")->
+  filter(result!="other") %>% 
+  filter(age_60_and_above!="NULL")->
   data2
-```
 
-```{r}
-write.csv(data2,'covid_data.csv')
+positive_data<-subset(data2,result=="positive")
+negative_data<-subset(data2,result=="negative")
+
+
+sub_neg<-sample_n(negative_data, 50000)
+sub_pos<-sample_n(positive_data,50000)
+
+data3<-rbind(sub_neg,sub_pos)
+
+
+
 ```
 
 
@@ -43,10 +52,10 @@ write.csv(data2,'covid_data.csv')
 
 ```{r}
 set.seed(123)
-sample = sample.split(data2,SplitRatio = 0.75)
+sample = sample.split(data3,SplitRatio = 0.75)
 
-train =subset(data2,sample ==TRUE) 
-test =subset(data2, sample==FALSE)
+train =subset(data3,sample ==TRUE) 
+test =subset(data3, sample==FALSE)
 ```
 
 
@@ -57,6 +66,7 @@ fit <- rpart(result~cough+fever+sore_throat+shortness_of_breath
              data = train, method = 'class')
 rpart.plot(fit)
 ```
+
 ```{r}
 predict_unseen <-predict(fit,test,type = 'class')
 table_mat <- table(test$result, predict_unseen)
@@ -67,6 +77,8 @@ table_mat
 accuracy_Test <- sum(diag(table_mat)) / sum(table_mat)
 print(paste('Accuracy for test', round(accuracy_Test*100,2)))
 ```
+
+
 ## Logistic Regression
 ```{r}
 library(boot)
@@ -77,7 +89,7 @@ summary(glm.fits)
 #cv.err
 
 glm.probs=predict(glm.fits,type="response")
-glm.pred=rep("0",554)
+glm.pred=rep("0",50000)
 glm.pred[glm.probs >0.5]="1"
 table(glm.pred,data2$result)
 mean(glm.pred==data2$result)
@@ -103,12 +115,16 @@ table(pred.class, test$result)
 
 mean(pred.class == test$result)
 ```
+
+
 ```{r}
 confusionMatrix(as.factor(pred.class), as.factor(test$result) )
 
 
 
 ```
+
+
 ## QDA
 ```{r}
 set.seed(23)
@@ -126,62 +142,6 @@ mean(pred.class1 == test$result)
 confusionMatrix(as.factor(pred.class1), as.factor(test$result ))
 
 ```
-
-
-<!-- SVM -->
-<!-- ```{r} -->
-<!-- library(e1071) -->
-
-<!-- S=svm(factor(result) ~ cough+fever+sore_throat+shortness_of_breath -->
-<!--              +head_ache+age_60_and_above+gender, data=data2, kernel="linear") -->
-<!-- summary(S) -->
-<!-- plot(S,data=data2) -->
-<!-- #Stuned=tune(svm, factor(result) ~ cough+fever+sore_throat+shortness_of_breath -->
-<!-- #             +head_ache+age_60_and_above+gender , data=data2 , ranges = list(cost=10^seq(-3,3), #kernel=c("sigmoid","polynomial","radial","linear")) ) -->
-
-<!-- #S1=svm(factor(result) ~ cough+fever+sore_throat+shortness_of_breath -->
-<!-- #             +head_ache+age_60_and_above+gender, data=data2, -->
-<!-- #       cost=Stuned$best.parameters$cost, kernel=Stuned$best.parameters$kernel) -->
-<!-- #plot(S1,data=data2) -->
-
-
-
-<!-- ``` -->
-
-<!-- NeuralNets- not working! -->
-<!-- ```{r} -->
-<!-- library(tidyverse) -->
-<!-- library(neuralnet) -->
-<!-- library(GGally) -->
-
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- library(neuralnet) -->
-<!-- set.seed(123) -->
-
-<!-- m <- model.matrix( -->
-<!--   ~ result +cough+fever+sore_throat+shortness_of_breath -->
-<!--              +head_ache+age_60_and_above+gender, -->
-<!--   data = data2 -->
-<!-- ) -->
-<!-- head(m) -->
-
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- r <- neuralnet( -->
-<!--   resultpositive ~ cough+fever+sore_throat+shortness_of_breath -->
-<!--              +head_ache+age_60_and_aboveNULL+age_60_and_aboveYes+genderfemale+gendermale, -->
-<!--   data=m, hidden=10, threshold=0.01 -->
-<!-- ) -->
-
-
-<!-- ``` -->
-
-
-
-
-
 
 
 
