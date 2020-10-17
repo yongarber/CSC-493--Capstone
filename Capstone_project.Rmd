@@ -41,7 +41,11 @@ negative_data<-subset(data2,result=="negative")
 sub_neg<-sample_n(negative_data, 50000)
 sub_pos<-sample_n(positive_data,50000)
 
+
+set.seed(42)
 data3<-rbind(sub_neg,sub_pos)
+rows <- sample(nrow(data3))
+data3 <- data3[rows, ]
 
 
 
@@ -70,7 +74,9 @@ rpart.plot(fit)
 ```{r}
 predict_unseen <-predict(fit,test,type = 'class')
 table_mat <- table(test$result, predict_unseen)
-table_mat
+
+fourfoldplot(table_mat, color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1, main = "Confusion Matrix")
 ```
 
 ```{r}
@@ -91,7 +97,18 @@ summary(glm.fits)
 glm.probs=predict(glm.fits,type="response")
 glm.pred=rep("0",50000)
 glm.pred[glm.probs >0.5]="1"
-table(glm.pred,data2$result)
+table_matrix<-table(glm.pred,data2$result)
+
+fourfoldplot(table_matrix, color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1, main = "Confusion Matrix")
+```
+```{r}
+accuracy_Test <- sum(diag(table_matrix)) / sum(table_matrix)
+print(paste('Accuracy for test', round(accuracy_Test*100,2)))
+```
+
+
+```{r}
 mean(glm.pred==data2$result)
 
 step(glm.fits)
@@ -99,7 +116,7 @@ step(glm.fits)
 
 ## LDA
 ```{r}
-set.seed(23)
+
 trControl <- trainControl(method  = "cv",
                           number  = 5)
 
@@ -111,17 +128,21 @@ ldafit <-train(as.factor(result)~cough+fever+sore_throat+shortness_of_breath
 ldafit
 
 pred.class = predict(ldafit, test)
-table(pred.class, test$result)
+table_matrix<-table(pred.class, test$result)
 
-mean(pred.class == test$result)
+fourfoldplot(table_matrix, color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1, main = "Confusion Matrix")
+```
+
+
+```{r}
+accuracy_Test <- sum(diag(table_matrix)) / sum(table_matrix)
+print(paste('Accuracy for test', round(accuracy_Test*100,2)))
 ```
 
 
 ```{r}
 confusionMatrix(as.factor(pred.class), as.factor(test$result) )
-
-
-
 ```
 
 
