@@ -74,9 +74,14 @@ rpart.plot(fit)
 ```{r}
 predict_unseen <-predict(fit,test,type = 'class')
 table_mat <- table(test$result, predict_unseen)
+table_mat
 
 fourfoldplot(table_mat, color = c("#CC6666", "#99CC99"),
-             conf.level = 0, margin = 1, main = "Confusion Matrix")
+             conf.level = 0, margin = 1,std='ind.max', main = "Confusion Matrix")+ 
+    text(-0.4,0.4, "TN", cex=1) + 
+    text(0.4, -0.4, "TP", cex=1) + 
+    text(0.4,0.4, "FP", cex=1) + 
+    text(-0.4, -0.4, "FN", cex=1)
 ```
 
 ```{r}
@@ -89,7 +94,7 @@ print(paste('Accuracy for test', round(accuracy_Test*100,2)))
 ```{r}
 library(boot)
 glm.fits=glm(as.factor(result)~cough+fever+sore_throat+shortness_of_breath
-             +head_ache+age_60_and_above+gender , data=data2, family = binomial)
+             +head_ache+age_60_and_above+gender , data=data3, family = binomial)
 summary(glm.fits)
 #cv.err=cv.glm(cancer,glm.fits,K=10)$delta[1]
 #cv.err
@@ -97,10 +102,14 @@ summary(glm.fits)
 glm.probs=predict(glm.fits,type="response")
 glm.pred=rep("0",50000)
 glm.pred[glm.probs >0.5]="1"
-table_matrix<-table(glm.pred,data2$result)
+table_matrix<-table(glm.pred,data3$result)
 
 fourfoldplot(table_matrix, color = c("#CC6666", "#99CC99"),
-             conf.level = 0, margin = 1, main = "Confusion Matrix")
+             conf.level = 0, margin = 1,std='ind.max', main = "Confusion Matrix")+ 
+    text(-0.4,0.4, "TN", cex=1) + 
+    text(0.4, -0.4, "TP", cex=1) + 
+    text(0.4,0.4, "FP", cex=1) + 
+    text(-0.4, -0.4, "FN", cex=1)
 ```
 ```{r}
 accuracy_Test <- sum(diag(table_matrix)) / sum(table_matrix)
@@ -131,7 +140,12 @@ pred.class = predict(ldafit, test)
 table_matrix<-table(pred.class, test$result)
 
 fourfoldplot(table_matrix, color = c("#CC6666", "#99CC99"),
-             conf.level = 0, margin = 1, main = "Confusion Matrix")
+             conf.level = 0, margin = 1,std='ind.max',
+             main = "Confusion Matrix")+ 
+    text(-0.4,0.4, "TN", cex=1) + 
+    text(0.4, -0.4, "TP", cex=1) + 
+    text(0.4,0.4, "FP", cex=1) + 
+    text(-0.4, -0.4, "FN", cex=1)
 ```
 
 
@@ -157,8 +171,23 @@ qdafit <-train(as.factor(result)~cough+fever+sore_throat+shortness_of_breath
 qdafit
 
 pred.class1 = predict(qdafit, test)
-table(pred.class1, test$result)
+table_matrix3<- table(pred.class1, test$result)
+fourfoldplot(table_matrix3, color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1,
+             std='ind.max',
+             main = "Confusion Matrix")+ 
+    text(-0.4,0.4, "TN", cex=1) + 
+    text(0.4, -0.4, "TP", cex=1) + 
+    text(0.4,0.4, "FP", cex=1) + 
+    text(-0.4, -0.4, "FN", cex=1)
+```
+```{r}
+accuracy_Test <- sum(diag(table_matrix)) / sum(table_matrix)
+print(paste('Accuracy for test', round(accuracy_Test*100,2)))
+```
 
+
+```{r}
 mean(pred.class1 == test$result)
 confusionMatrix(as.factor(pred.class1), as.factor(test$result ))
 
