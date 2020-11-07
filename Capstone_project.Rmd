@@ -104,6 +104,7 @@ glm.pred=rep("0",50000)
 glm.pred[glm.probs >0.5]="1"
 table_matrix<-table(glm.pred,data3$result)
 
+
 fourfoldplot(table_matrix, color = c("#CC6666", "#99CC99"),
              conf.level = 0, margin = 1,std='ind.max', main = "Confusion Matrix")+ 
     text(-0.4,0.4, "TN", cex=1) + 
@@ -191,6 +192,11 @@ print(paste('Accuracy for test', round(accuracy_Test*100,2)))
 mean(pred.class1 == test$result)
 confusionMatrix(as.factor(pred.class1), as.factor(test$result ))
 
+```
+
+```{r}
+glm.probs<-predict(glm.fits,newdata = data.frame(cough = 1, fever=1,sore_throat=0,shortness_of_breath=0,head_ache=0,age_60_and_above="No",gender="male"))
+glm.probs
 ```
 
 
